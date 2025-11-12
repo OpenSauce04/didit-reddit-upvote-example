@@ -13,11 +13,6 @@ async function getExistingVote(userId, postId) {
 }
 
 async function handleVote(userId, postId, newVote) {
-  // Check if the user has already voted on this post
-  if (!userId) {
-    throw new Error("Cannot vote without being logged in");
-  }
-
   const existingVote = await getExistingVote(userId, postId);
 
   if (existingVote) {
@@ -46,6 +41,7 @@ async function handleVote(userId, postId, newVote) {
 export async function Vote({ postId, votes }) {
   const session = await auth();
   const existingVote = await getExistingVote(session?.user?.id, postId);
+  const isLoggedIn = (session?.user?.id == true);
 
   async function upvote() {
     "use server";
@@ -57,51 +53,29 @@ export async function Vote({ postId, votes }) {
     await handleVote(session?.user?.id, postId, -1);
   }
 
-  return (
-    <>
-      <form className="flex items-center space-x-3 pl-3">
-        <VoteButtons
-          upvote={upvote}
-          downvote={downvote}
-          votes={votes}
-          existingVote={existingVote}
-        />
-        {/* <button formAction={upvote}>
-          {existingVote?.vote === 1 ? (
-            <TbArrowBigUpFilled
-              size={24}
-              className={clsx("hover:text-orange-600", {
-                "text-pink-300": existingVote?.vote === 1,
-              })}
-            />
-          ) : (
-            <TbArrowBigUp
-              size={24}
-              className={clsx("hover:text-orange-600", {
-                "text-pink-300": existingVote?.vote === 1,
-              })}
-            />
-          )}
-        </button>
-        <span className="w-6 text-center tabular-nums">{votes}</span>
-        <button formAction={downvote}>
-          {existingVote?.vote === -1 ? (
-            <TbArrowBigDownFilled
-              size={24}
-              className={clsx("hover:text-blue-600", {
-                "text-blue-300": existingVote?.vote === -1,
-              })}
-            />
-          ) : (
-            <TbArrowBigDown
-              size={24}
-              className={clsx("hover:text-blue-600", {
-                "text-blue-300": existingVote?.vote === -1,
-              })}
-            />
-          )}
-        </button> */}
-      </form>
-    </>
+  // This whole thing is kind of messy, blame NextJS.
+  const voteButtons = (
+    <VoteButtons
+      upvote={upvote}
+      downvote={downvote}
+      votes={votes}
+      existingVote={existingVote}
+      isLoggedIn={isLoggedIn}
+    />
   );
+  const formClasses = "flex items-center space-x-3 pl-3";
+
+  if (isLoggedIn)
+    return (
+      <form className={formClasses}>
+        {voteButtons}
+      </form>
+    );  
+  else {
+    return (
+      <div className={formClasses}>
+        {voteButtons}
+      </div>
+    );
+  }
 }

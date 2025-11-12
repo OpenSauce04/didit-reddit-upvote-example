@@ -9,13 +9,16 @@ import {
   TbArrowBigUpFilled,
 } from "react-icons/tb";
 import { FaSpinner } from "react-icons/fa";
+import Toastify from 'toastify-js'
+import "toastify-js/src/toastify.css"
 
-export function VoteButtons({ upvote, downvote, votes, existingVote }) {
+export function VoteButtons({ upvote, downvote, votes, existingVote, isLoggedIn }) {
   const { pending, data, method, action } = useFormStatus();
 
+  function generateButtons(onClick, upvote, downvote) {
   return (
     <>
-      <button formAction={upvote}>
+      <button onClick={onClick} formAction={upvote}>
         {existingVote?.vote === 1 ? (
           <TbArrowBigUpFilled
             size={24}
@@ -41,7 +44,7 @@ export function VoteButtons({ upvote, downvote, votes, existingVote }) {
           votes
         )}
       </span>
-      <button formAction={downvote}>
+      <button onClick={onClick} formAction={downvote}>
         {existingVote?.vote === -1 ? (
           <TbArrowBigDownFilled
             size={24}
@@ -60,4 +63,30 @@ export function VoteButtons({ upvote, downvote, votes, existingVote }) {
       </button>
     </>
   );
+  }
+
+  // This was the most elegant solution I could come up with. The blood is on NextJS's hands.
+  if (isLoggedIn) {
+    return generateButtons(
+      null,
+      upvote,
+      downvote
+    )
+  } else {
+    return generateButtons(
+      () => Toastify({
+        text: "You need to log in before voting.",
+        duration: 3000,
+        close: true,
+        gravity: "top",
+        position: "center",
+        stopOnFocus: true,
+        style: {
+          background: "red",
+        }
+      }).showToast(),
+      null,
+      null
+    )
+  }
 }
