@@ -25,18 +25,21 @@ export default async function SinglePostPage({ params }) {
   );
 
   return (
-    <div className="max-w-screen-lg mx-auto pt-4 pr-4">
-      <div className="flex space-x-6">
-        <Vote postId={post.id} votes={post.vote_total} />
-        <div className="">
-          <h1 className="text-2xl">{post.title}</h1>
-          <p className="text-zinc-400 mb-4">Posted by {post.name}</p>
+    <>
+      <title>{`Didit - ${post.title}`}</title>
+      <div className="max-w-screen-lg mx-auto pt-4 pr-4">
+        <div className="flex space-x-6">
+          <Vote postId={post.id} votes={post.vote_total} />
+          <div className="">
+            <h1 className="text-2xl">{post.title}</h1>
+            <p className="text-zinc-400 mb-4">Posted by {post.name}</p>
+          </div>
         </div>
-      </div>
-      <main className="whitespace-pre-wrap m-4">{post.body}</main>
+        <main className="whitespace-pre-wrap m-4">{post.body}</main>
 
-      <CommentForm postId={post.id} />
-      <CommentList postId={post.id} />
-    </div>
+        <CommentForm postId={post.id} />
+        <CommentList postId={post.id} />
+      </div>
+    </>
   );
 }
