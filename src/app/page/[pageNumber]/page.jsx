@@ -1,9 +1,9 @@
 import { PostList } from "@/components/PostList";
 
-export default async function PageNumberRoute({ params }) {
+export default async function PageNumberRoute({ searchParams }) {
   return (
     <div>
-      <PostList currentPage={parseInt(params.pageNumber, 10)} />
+      <PostList searchParams={searchParams} currentPage={parseInt(searchParams.pageNumber, 10)} />
     </div>
   );
 }

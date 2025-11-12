@@ -3,8 +3,23 @@ import { Pagination } from "./Pagination";
 import { Vote } from "./Vote";
 import { db } from "@/db";
 import { POSTS_PER_PAGE } from "@/config";
+import { SortMethodSelect } from '@/components/SortMethodSelect'
 
-export async function PostList({ currentPage = 1 }) {
+export async function PostList({ searchParams, currentPage = 1 }) {
+  var sortMethod = "vote_total"
+  switch (searchParams.sortMethod) {
+    case "vote_total":
+    case "posts.id":
+      sortMethod = searchParams.sortMethod
+  }
+
+  var sortDirection = "DESC"
+  switch (searchParams.sortDirection) {
+    case "DESC":
+    case "ASC":
+      sortDirection = searchParams.sortDirection
+  }
+
   const { rows: posts } =
     await db.query(`SELECT posts.id, posts.title, posts.body, posts.created_at, users.name, 
     COALESCE(SUM(votes.vote), 0) AS vote_total
@@ -12,13 +27,14 @@ export async function PostList({ currentPage = 1 }) {
      JOIN users ON posts.user_id = users.id
      LEFT JOIN votes ON votes.post_id = posts.id
      GROUP BY posts.id, users.name
-     ORDER BY vote_total DESC
+     ORDER BY ${sortMethod} ${sortDirection}
      LIMIT ${POSTS_PER_PAGE}
      OFFSET ${POSTS_PER_PAGE * (currentPage - 1)}`);
 
   return (
     <>
       <ul className="max-w-screen-lg mx-auto p-4 mb-4">
+        <SortMethodSelect sortMethod={sortMethod} sortDirection={sortDirection} />
         {posts.map((post) => (
           <li
             key={post.id}
